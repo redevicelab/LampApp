@@ -23,5 +23,18 @@ namespace LampApp.ViewModels
             set => Set(ref _Title, value, "Title");
         }
         #endregion
+
+        #region Status : status - Статус программы
+
+        private string _Status;
+        /// <summary>Статус программы</summary>
+        public string Status
+        {
+            get => _Status;
+            set => Set(ref _Status, value, "Status");
+        }
+
+
+        #endregion
     }
 }
