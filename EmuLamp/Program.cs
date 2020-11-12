@@ -23,7 +23,6 @@ namespace EmuLamp
                 {
                     while (true)
                     {
-                        udpCl
                         var receivedResult = await udpClient.ReceiveAsync();
                         Console.Write(Encoding.ASCII.GetString(receivedResult.Buffer));
                     }
