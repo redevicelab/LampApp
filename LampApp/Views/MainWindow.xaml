@@ -52,7 +52,7 @@
                           Grid.Column="1"
                           Content="Power"
                           Margin="13"
-                          />
+                          Command="{Binding PowerSwitch}"/>
         </Grid>
         <StackPanel Margin="10">
             <Expander Header="Подключение">
@@ -82,7 +82,8 @@
                              Grid.Column="1" 
                              Margin="3" 
                              Height="auto"
-                             VerticalAlignment="Center" />
+                             VerticalAlignment="Center" 
+                             Text="{Binding Address}"/>
 
                     <TextBox x:Name="tbPort" 
                              Grid.Row="1" 
@@ -112,8 +113,8 @@
 
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto"/>
-                        <ColumnDefinition Width="250"/>
-                        <ColumnDefinition Width="0.1*"/>
+                        <ColumnDefinition Width="220"/>
+                        <ColumnDefinition Width="0.15*"/>
                     </Grid.ColumnDefinitions>
 
                     <Label Padding="5" 
@@ -136,14 +137,17 @@
                               Grid.Row="0" 
                               Grid.Column="1" 
                               Padding="5" 
-                              Margin="5" />
+                              Margin="5"
+                              ItemsSource="{Binding listEffects}"
+                              SelectedItem="{Binding SelectedEffect}"
+                              DisplayMemberPath="NameEffect"/>
 
                     <Slider x:Name="slSpeed" 
                             Grid.Row="1" 
                             Grid.Column="1" 
                             Value="{Binding Speed}" 
                             Minimum="0" 
-                            Maximum="100" 
+                            Maximum="255" 
                             SelectionStart="0" 
                             Height="30" 
                             IsSelectionRangeEnabled="True" 
@@ -154,9 +158,9 @@
                     <Slider x:Name="slScale" 
                             Grid.Row="2" 
                             Grid.Column="1" 
-                            Value="0" 
+                            Value="{Binding Scale}" 
                             Minimum="0" 
-                            Maximum="255" 
+                            Maximum="100" 
                             SelectionStart="0" 
                             Height="30" 
                             IsSelectionRangeEnabled="True" 

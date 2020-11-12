@@ -35,31 +35,33 @@ namespace LampApp.Models
         /// <summary>
         /// Метод получения натроек от лампы
         /// </summary>
-        public void GetSettings()
+        public string GetSettings()
         {
-            
+            return "GET";
         }
         /// <summary>
         /// Метод отправки сообщения на лампу
         /// </summary>
         /// <param name="settingName">Название настроки</param>
         /// <param name="value">Значение</param>
-        public void SendSetting(string settingName, int value)
+        public string SendSetting(string settingName, int value)
         {
-            Console.WriteLine(settingName + value);
+            return settingName + value.ToString();
         }
 
-        public void PowerOnOff()
+        public bool PowerOnOff(bool power)
         {
-            if (Power)
+            if (power)
             {
                 Console.WriteLine("P_OFF");
-                Power = !Power;
+                power = !power;
+                return power;
             }
             else
             {
                 Console.WriteLine("P_ON");
-                Power = !Power;
+                power = !power;
+                return power;
             }
         }
 
