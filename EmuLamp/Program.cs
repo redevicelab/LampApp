@@ -12,22 +12,61 @@ namespace EmuLamp
     {
         static void Main()
         {
-            Console.WriteLine("Start");
-            ReceiveMessage();
-            Console.ReadLine();
+            //#region UDP Server
+            //const string ip = "127.0.0.1";
+            //const int port = 8889;
 
+            //var endPoint = new IPEndPoint(IPAddress.Parse(ip), port);
+            //var udpsocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            //udpsocket.Bind(endPoint);
+            //while (true)
+            //{
+            //    var buffer = new byte[256];
+            //    var size = 0;
+            //    var data = new StringBuilder();
+            //    EndPoint senderPoint = new IPEndPoint(IPAddress.Any, 0);
+            //    do
+            //    {
+            //        size = udpsocket.ReceiveFrom(buffer, ref senderPoint);
+            //        data.Append(Encoding.UTF8.GetString(buffer));
+            //    } while (udpsocket.Available > 0);
 
-           async Task ReceiveMessage()
+            //    Console.WriteLine(data);
+            //    udpsocket.SendTo(Encoding.UTF8.GetBytes("Recevied"), senderPoint);
+            //}
+            //#endregion
+           
+            #region UDP Client
+            const string ip = "127.0.0.1";
+            const int port = 8889; //порт клиента
+
+            var endPoint = new IPEndPoint(IPAddress.Parse(ip), port);
+            var udpsocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            udpsocket.Bind(endPoint);
+
+            while (true)
             {
-                using (var udpClient = new UdpClient(8888))
+                var buffer = new byte[256];
+                var size = 0;
+                var data = new StringBuilder();
+
+                Console.Write("Ввод: ");
+                var mes = Console.ReadLine();
+                var serverEndPoint = new IPEndPoint(IPAddress.Parse(ip),8888); // Порт и адресс сервера
+                udpsocket.SendTo(Encoding.UTF8.GetBytes(mes), serverEndPoint);
+
+                while (udpsocket.Available > 0)
                 {
-                    while (true)
-                    {
-                        var receivedResult = await udpClient.ReceiveAsync();
-                        Console.Write(Encoding.ASCII.GetString(receivedResult.Buffer));
-                    }
+                    EndPoint senderPoint = new IPEndPoint(IPAddress.Any, 0);
+                    size = udpsocket.ReceiveFrom(buffer, ref senderPoint);
+                    data.Append(Encoding.UTF8.GetString(buffer));
                 }
+
+                Console.WriteLine(data);
             }
+            #endregion
+
+
         }
 
         private static void ReceiveMessage(int port)
