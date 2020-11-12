@@ -18,6 +18,7 @@ namespace LampApp.ViewModels
         //CURR EFF BRI SPD SCA PWR
         private Lamp lamp = new Lamp();
         private Effect effect = new Effect();
+        private bool RuleToParse = false;
 
         UdpClient client = new UdpClient(8889);
         string data = "";
@@ -71,16 +72,17 @@ namespace LampApp.ViewModels
 
         #region Combobox Эффекты
         private Effect _SelectedEffect;
-        public List<Effect> listEffects { get; set; }
+        public List<Effect> ListEffects { get; set; }
         public Effect SelectedEffect
         {
             get { return _SelectedEffect; }
             set
             {
                 Set(ref _SelectedEffect, value);
-                //IPEndPoint endPointToServer = new IPEndPoint(IPAddress.Parse(Address), int.Parse(Port));
-                //byte[] mes = Encoding.ASCII.GetBytes("EFF" + SelectedEffect.NumberEffect);
-                //client.Send(mes, mes.Length, endPointToServer);
+                RuleToParse = true;
+                IPEndPoint endPointToServer = new IPEndPoint(IPAddress.Parse(Address), int.Parse(Port));
+                byte[] mes = Encoding.ASCII.GetBytes("EFF" + SelectedEffect.NumberEffect);
+                client.Send(mes, mes.Length, endPointToServer);
             }
         }
 
@@ -98,9 +100,9 @@ namespace LampApp.ViewModels
             set
             {
                 Set(ref _Speed, value);
-                //IPEndPoint endPointToServer = new IPEndPoint(IPAddress.Parse(Address), int.Parse(Port));
-                //byte[] mes = Encoding.ASCII.GetBytes("SPD" + Speed);
-                //client.Send(mes, mes.Length, endPointToServer);
+                IPEndPoint endPointToServer = new IPEndPoint(IPAddress.Parse(Address), int.Parse(Port));
+                byte[] mes = Encoding.ASCII.GetBytes("SPD" + Speed);
+                client.Send(mes, mes.Length, endPointToServer);
             }
         }
         #endregion
@@ -116,9 +118,9 @@ namespace LampApp.ViewModels
             set
             {
                 Set(ref _Scale, value);
-                //IPEndPoint endPointToServer = new IPEndPoint(IPAddress.Parse(Address), int.Parse(Port));
-                //byte[] mes = Encoding.ASCII.GetBytes("SCA" + Scale);
-                //client.Send(mes, mes.Length, endPointToServer);
+                IPEndPoint endPointToServer = new IPEndPoint(IPAddress.Parse(Address), int.Parse(Port));
+                byte[] mes = Encoding.ASCII.GetBytes("SCA" + Scale);
+                client.Send(mes, mes.Length, endPointToServer);
             }
         }
         #endregion
@@ -134,15 +136,15 @@ namespace LampApp.ViewModels
             set
             {
                 Set(ref _Brightness, value);
-                //IPEndPoint endPointToServer = new IPEndPoint(IPAddress.Parse(Address), int.Parse(Port));
-                //byte[] mes = Encoding.ASCII.GetBytes("BRI"+Brightness);
-                //client.Send(mes, mes.Length, endPointToServer);
+                IPEndPoint endPointToServer = new IPEndPoint(IPAddress.Parse(Address), int.Parse(Port));
+                byte[] mes = Encoding.ASCII.GetBytes("BRI" + Brightness);
+                client.Send(mes, mes.Length, endPointToServer);
             }
         }
         #endregion
 
         #region Power состояние лампы
-        private bool _Power;
+        private bool _Power = true;
         /// <summary>
         /// Состояние лампы
         /// </summary>
@@ -164,23 +166,11 @@ namespace LampApp.ViewModels
             {
                 return new DelegateCommand((obj) =>
                 {
+                    RuleToParse = true;
                     IPEndPoint endPointToServer = new IPEndPoint(IPAddress.Parse(Address), int.Parse(Port));
                     byte[] mes = Encoding.ASCII.GetBytes("GET");
                     client.Send(mes, mes.Length, endPointToServer);
-                });
-            }
-        }
 
-
-        public ICommand EffectSel
-        {
-            get
-            {
-                return new DelegateCommand((obj) =>
-                {
-                    IPEndPoint endPointToServer = new IPEndPoint(IPAddress.Parse(Address), int.Parse(Port));
-                    byte[] mes = Encoding.ASCII.GetBytes("EFF"+SelectedEffect.NumberEffect);
-                    client.Send(mes, mes.Length, endPointToServer);
                 });
             }
         }
@@ -193,10 +183,10 @@ namespace LampApp.ViewModels
                 byte[] recv = client.EndReceive(res, ref endPoint);
                 data = $"{Encoding.ASCII.GetString(recv)}";
                 Status = data;
-                if (data.Contains("CURR"))
+                if (data.Contains("CURR") && RuleToParse)
                 {
                     string[] parse = data.Split(' ');
-                    foreach (var item in listEffects)
+                    foreach (var item in ListEffects)
                     {
                         if (item.NumberEffect == int.Parse(parse[1]))
                             SelectedEffect = item;
@@ -205,7 +195,7 @@ namespace LampApp.ViewModels
                     Speed = int.Parse(parse[3]);
                     Scale = int.Parse(parse[4]);
                     Power = !Convert.ToBoolean(int.Parse(parse[5]));
-
+                    RuleToParse = false;
                 }
                 client.BeginReceive(new AsyncCallback(Recevive), null);
 
@@ -227,6 +217,7 @@ namespace LampApp.ViewModels
             {
                 return new DelegateCommand((obj) =>
                 {
+                    RuleToParse = true;
                     string command;
                     if (!Power)
                         command = "P_ON";
@@ -243,7 +234,7 @@ namespace LampApp.ViewModels
 
         public MainViewModel()
         {
-            listEffects = new List<Effect>
+            ListEffects = new List<Effect>
             {
                 new Effect {NumberEffect = 0, NameEffect = "Конфити"},
                 new Effect {NumberEffect = 1, NameEffect = "Огонь"},
@@ -263,8 +254,10 @@ namespace LampApp.ViewModels
                 new Effect {NumberEffect = 15, NameEffect = "Матрица"},
                 new Effect {NumberEffect = 16, NameEffect = "Светлячки"}
             };
-
+            RuleToParse = true;
             client.BeginReceive(new AsyncCallback(Recevive), null);
+
+            NewMethod();
 
             Task.Factory.StartNew(() =>
             {
@@ -283,11 +276,17 @@ namespace LampApp.ViewModels
                         Status = "Подключение...";
                         Task.Delay(1000).Wait();
                     }
-
                 }
 
             });
 
+        }
+
+        private void NewMethod()
+        {
+            IPEndPoint endPointToServer = new IPEndPoint(IPAddress.Parse(Address), int.Parse(Port));
+            byte[] mes = Encoding.ASCII.GetBytes("GET");
+            client.Send(mes, mes.Length, endPointToServer);
         }
     }
 }
