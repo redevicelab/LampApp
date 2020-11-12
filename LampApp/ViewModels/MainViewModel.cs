@@ -19,12 +19,6 @@ namespace LampApp.ViewModels
         public string Title
         {
             get => _Title;
-            //set 
-            //{
-            //    if (Equals(_Title, value)) return;
-            //    _Title = value;
-            //    OnPropertyChanged("Title");
-            //}
             set => Set(ref _Title, value, "Title");
         }
         #endregion
@@ -110,7 +104,7 @@ namespace LampApp.ViewModels
         /// <summary>
         /// Команда на вкл/откл лампы
         /// </summary>
-        public ICommand Power
+        public ICommand PowerSwitch
         {
             get
             {

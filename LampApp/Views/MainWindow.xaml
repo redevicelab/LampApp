@@ -13,31 +13,31 @@
         ResizeMode="CanMinimize" 
         WindowStartupLocation="CenterScreen" 
         Background="#FF333333">
-    
+
     <Window.DataContext>
         <vm:MainViewModel/>
     </Window.DataContext>
-    
+
     <DockPanel Background="Transparent">
         <StatusBar DockPanel.Dock="Bottom">
             <StatusBarItem>
-                
+
                 <TextBlock x:Name="tbStatus" 
                            Text="{Binding Status}"/>
-                
+
             </StatusBarItem>
         </StatusBar>
         <Grid DockPanel.Dock="Bottom" Margin="10">
-            
+
             <Grid.RowDefinitions>
                 <RowDefinition Height="100"/>
             </Grid.RowDefinitions>
-            
+
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="0.25*"/>
+                <ColumnDefinition Width="100"/>
             </Grid.ColumnDefinitions>
-            
+
             <Slider x:Name="slBrightness" 
                     Value="{Binding Brightness}" 
                     Grid.Row="0" Grid.Column="0" 
@@ -45,29 +45,30 @@
                     SelectionStart="0" Height="30" 
                     IsSelectionRangeEnabled="True" 
                     Margin="10,40,10,30"/>
-            
-            <ToggleButton x:Name="Power" 
+
+            <ToggleButton x:Name="Power"
+                          Style="{StaticResource ToggleButton_Occupado}"
                           Grid.Row="0" 
-                          Grid.Column="1" 
-                          Content="Power" 
-                          Margin="0,10"
-                          Command="{Binding Power}"/>
+                          Grid.Column="1"
+                          Content="Power"
+                          Margin="13"
+                          />
         </Grid>
         <StackPanel Margin="10">
             <Expander Header="Подключение">
                 <Grid>
-                    
+
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
                     </Grid.RowDefinitions>
-                    
+
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto"/>
                         <ColumnDefinition Width="280"/>
                     </Grid.ColumnDefinitions>
-                    
+
                     <Label Padding="5" 
                            Margin="5" 
                            Content="IP"/>
@@ -75,14 +76,14 @@
                     <Label Grid.Row="1" 
                            Padding="5" 
                            Margin="5" Content="Порт"/>
-                    
+
                     <TextBox x:Name="tbAddress" 
                              Grid.Row="0" 
                              Grid.Column="1" 
                              Margin="3" 
                              Height="auto"
                              VerticalAlignment="Center" />
-                    
+
                     <TextBox x:Name="tbPort" 
                              Grid.Row="1" 
                              Grid.Column="1" 
@@ -99,16 +100,16 @@
                             Command="{Binding GetSettings}"/>
                 </Grid>
             </Expander>
-            
+
             <Expander Header="Режимы" IsExpanded="True">
                 <Grid>
-                    
+
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
                     </Grid.RowDefinitions>
-                    
+
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto"/>
                         <ColumnDefinition Width="250"/>
@@ -130,13 +131,13 @@
                            Padding="5" 
                            Margin="5"
                            Content="Маштаб"/>
-                    
+
                     <ComboBox x:Name="cbModes" 
                               Grid.Row="0" 
                               Grid.Column="1" 
                               Padding="5" 
                               Margin="5" />
-                    
+
                     <Slider x:Name="slSpeed" 
                             Grid.Row="1" 
                             Grid.Column="1" 
@@ -149,7 +150,7 @@
                             Margin="0,9,0,33" 
                             Grid.RowSpan="2" 
                             IsSnapToTickEnabled="True"/>
-                    
+
                     <Slider x:Name="slScale" 
                             Grid.Row="2" 
                             Grid.Column="1" 
@@ -162,7 +163,7 @@
                             VerticalAlignment="Center" 
                             Margin="0,10,0,-4" 
                             IsSnapToTickEnabled="True"/>
-                    
+
                     <TextBlock x:Name="tbSpeed" 
                                Grid.Row="1" 
                                Grid.Column="2" 
@@ -171,7 +172,7 @@
                                VerticalAlignment="Center" 
                                HorizontalAlignment="Right" 
                                Foreground="White"/>
-                    
+
                     <TextBlock x:Name="tbScale" 
                                Grid.Row="2" 
                                Grid.Column="2" 

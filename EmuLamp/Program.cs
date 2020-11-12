@@ -10,74 +10,38 @@ namespace EmuLamp
 {
     class Program
     {
-        static int localPort; // порт приема сообщений
-        static int remotePort; // порт для отправки сообщений
-        static Socket listeningSocket;
-
-        static void Main(string[] args)
+        static void Main()
         {
-            Console.Write("Введите порт для приема сообщений: ");
-            localPort = Int32.Parse(Console.ReadLine());
-            Console.Write("Введите порт для отправки сообщений: ");
-            remotePort = Int32.Parse(Console.ReadLine());
-            Console.WriteLine("Для отправки сообщений введите сообщение и нажмите Enter");
-            Console.WriteLine();
-
-            try
-            {
-                listeningSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                Task listeningTask = new Task(Listen);
-                listeningTask.Start();
-
-                // отправка сообщений на разные порты
-                while (true)
-                {
-                    string message = Console.ReadLine();
-
-                    byte[] data = Encoding.Unicode.GetBytes(message);
-                    EndPoint remotePoint = new IPEndPoint(IPAddress.Parse("192.168.0.7"), remotePort);
-                    listeningSocket.SendTo(data, remotePoint);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+            Console.WriteLine("Start");
+            ReceiveMessage();
             Console.ReadLine();
 
+
+           async Task ReceiveMessage()
+            {
+                using (var udpClient = new UdpClient(8888))
+                {
+                    while (true)
+                    {
+                        udpCl
+                        var receivedResult = await udpClient.ReceiveAsync();
+                        Console.Write(Encoding.ASCII.GetString(receivedResult.Buffer));
+                    }
+                }
+            }
         }
 
-        // поток для приема подключений
-        private static void Listen()
+        private static void ReceiveMessage(int port)
         {
+            UdpClient receiver = new UdpClient(port); // UdpClient для получения данных
+            IPEndPoint remoteIp = null; // адрес входящего подключения
             try
             {
-                //Прослушиваем по адресу
-                IPEndPoint localIP = new IPEndPoint(IPAddress.Parse("192.168.0.7"), localPort);
-                listeningSocket.Bind(localIP);
-
                 while (true)
                 {
-                    // получаем сообщение
-                    StringBuilder builder = new StringBuilder();
-                    int bytes = 0; // количество полученных байтов
-                    byte[] data = new byte[256]; // буфер для получаемых данных
-
-                    //адрес, с которого пришли данные
-                    EndPoint remoteIp = new IPEndPoint(IPAddress.Any, 0);
-
-                    do
-                    {
-                        bytes = listeningSocket.ReceiveFrom(data, ref remoteIp);
-                        builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
-                    }
-                    while (listeningSocket.Available > 0);
-                    // получаем данные о подключении
-                    IPEndPoint remoteFullIp = remoteIp as IPEndPoint;
-
-                    // выводим сообщение
-                    Console.WriteLine("{0}:{1} - {2}", remoteFullIp.Address.ToString(),
-                                                    remoteFullIp.Port, builder.ToString());
+                    byte[] data = receiver.Receive(ref remoteIp); // получаем данные
+                    string message = Encoding.ASCII.GetString(data);
+                    Console.WriteLine("Собеседник: {0}", message);
                 }
             }
             catch (Exception ex)
@@ -86,17 +50,7 @@ namespace EmuLamp
             }
             finally
             {
-                Close();
-            }
-        }
-        // закрытие сокета
-        private static void Close()
-        {
-            if (listeningSocket != null)
-            {
-                listeningSocket.Shutdown(SocketShutdown.Both);
-                listeningSocket.Close();
-                listeningSocket = null;
+                receiver.Close();
             }
         }
 

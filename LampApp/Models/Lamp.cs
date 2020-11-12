@@ -37,7 +37,7 @@ namespace LampApp.Models
         /// </summary>
         public void GetSettings()
         {
-
+            
         }
         /// <summary>
         /// Метод отправки сообщения на лампу
@@ -46,12 +46,26 @@ namespace LampApp.Models
         /// <param name="value">Значение</param>
         public void SendSetting(string settingName, int value)
         {
-
+            Console.WriteLine(settingName + value);
         }
 
         public void PowerOnOff()
         {
+            if (Power)
+            {
+                Console.WriteLine("P_OFF");
+                Power = !Power;
+            }
+            else
+            {
+                Console.WriteLine("P_ON");
+                Power = !Power;
+            }
+        }
 
+        public void ReceiveData()
+        {
+            //Тут делаю бесконечный цикл на прием данных и парсю если curr то распарсиваю на свойства если что то другое просто вывожу в статус делов то
         }
     }
 }
