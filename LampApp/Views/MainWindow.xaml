@@ -52,7 +52,8 @@
                           Grid.Column="1"
                           Content="Power"
                           Margin="13"
-                          Command="{Binding PowerSwitch}"/>
+                          Command="{Binding PowerSwitch}"
+                          IsChecked="{Binding Power}"/>
         </Grid>
         <StackPanel Margin="10">
             <Expander Header="Подключение">
@@ -90,7 +91,8 @@
                              Grid.Column="1" 
                              Margin="3" 
                              Height="auto"
-                             VerticalAlignment="Center"/>
+                             VerticalAlignment="Center"
+                             Text="{Binding Port}"/>
 
                     <Button x:Name="bGetSettings" 
                             Grid.Row="3" 
@@ -140,7 +142,8 @@
                               Margin="5"
                               ItemsSource="{Binding listEffects}"
                               SelectedItem="{Binding SelectedEffect}"
-                              DisplayMemberPath="NameEffect"/>
+                              DisplayMemberPath="NameEffect"
+                              />
 
                     <Slider x:Name="slSpeed" 
                             Grid.Row="1" 
@@ -171,7 +174,7 @@
                     <TextBlock x:Name="tbSpeed" 
                                Grid.Row="1" 
                                Grid.Column="2" 
-                               Text="{Binding ElementName=slSpeed, Path=Value}" 
+                               Text="{Binding Speed}" 
                                Margin="10" 
                                VerticalAlignment="Center" 
                                HorizontalAlignment="Right" 

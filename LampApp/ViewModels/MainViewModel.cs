@@ -3,7 +3,10 @@ using LampApp.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -11,8 +14,13 @@ namespace LampApp.ViewModels
 {
     public class MainViewModel : ViewModel
     {
+
+        //CURR EFF BRI SPD SCA PWR
         private Lamp lamp = new Lamp();
         private Effect effect = new Effect();
+
+        UdpClient client = new UdpClient(8889);
+        string data = "";
 
         #region Заголовок окна
         private string _Title = "LampApp";
@@ -37,15 +45,15 @@ namespace LampApp.ViewModels
 
         #endregion
 
-        #region Адресс
+        #region Адрес
         /// <summary>
         /// Поле ввода адреса
         /// </summary>
-        private string _Address = "127.0.0.1";
+        private string _Address = "192.168.0.7";
         public string Address
         {
             get => _Address;
-            set => Set(ref _Address, value, "Status");
+            set => Set(ref _Address, value);
         }
         #endregion
 
@@ -53,11 +61,11 @@ namespace LampApp.ViewModels
         /// <summary>
         /// Поле ввода порта
         /// </summary>
-        private int _Port;
-        public int Port
+        private string _Port = "8888";
+        public string Port
         {
             get => _Port;
-            set => Set(ref _Port, value, "Status");
+            set => Set(ref _Port, value);
         }
         #endregion
 
@@ -69,25 +77,14 @@ namespace LampApp.ViewModels
             get { return _SelectedEffect; }
             set
             {
-                _SelectedEffect = value;
-                OnPropertyChanged("SelectedPhone");
-                Status = lamp.SendSetting("EFF", _SelectedEffect.NumberEffect);
+                Set(ref _SelectedEffect, value);
+                //IPEndPoint endPointToServer = new IPEndPoint(IPAddress.Parse(Address), int.Parse(Port));
+                //byte[] mes = Encoding.ASCII.GetBytes("EFF" + SelectedEffect.NumberEffect);
+                //client.Send(mes, mes.Length, endPointToServer);
             }
         }
 
 
-        #endregion
-
-        #region Кнопка включения
-        /// <summary>
-        /// Состояние кнопки Power
-        /// </summary>
-        private bool _Power = false;
-        public bool Power
-        {
-            get => _Power;
-            set => Set(ref _Power, value, "Power");
-        }
         #endregion
 
         #region Слайдер скрость
@@ -100,8 +97,10 @@ namespace LampApp.ViewModels
             get => _Speed;
             set
             {
-                Set(ref _Speed, value, "Status");
-                Status = lamp.SendSetting("SPD", _Speed);
+                Set(ref _Speed, value);
+                //IPEndPoint endPointToServer = new IPEndPoint(IPAddress.Parse(Address), int.Parse(Port));
+                //byte[] mes = Encoding.ASCII.GetBytes("SPD" + Speed);
+                //client.Send(mes, mes.Length, endPointToServer);
             }
         }
         #endregion
@@ -116,8 +115,10 @@ namespace LampApp.ViewModels
             get => _Scale;
             set
             {
-                Set(ref _Scale, value, "Status");
-                Status = lamp.SendSetting("SCA", _Scale);
+                Set(ref _Scale, value);
+                //IPEndPoint endPointToServer = new IPEndPoint(IPAddress.Parse(Address), int.Parse(Port));
+                //byte[] mes = Encoding.ASCII.GetBytes("SCA" + Scale);
+                //client.Send(mes, mes.Length, endPointToServer);
             }
         }
         #endregion
@@ -132,10 +133,25 @@ namespace LampApp.ViewModels
             get => _Brightness;
             set
             {
-                Set(ref _Brightness, value, "Status");
-                Status = lamp.SendSetting("BRI", _Brightness);
+                Set(ref _Brightness, value);
+                //IPEndPoint endPointToServer = new IPEndPoint(IPAddress.Parse(Address), int.Parse(Port));
+                //byte[] mes = Encoding.ASCII.GetBytes("BRI"+Brightness);
+                //client.Send(mes, mes.Length, endPointToServer);
             }
         }
+        #endregion
+
+        #region Power состояние лампы
+        private bool _Power;
+        /// <summary>
+        /// Состояние лампы
+        /// </summary>
+        public bool Power
+        {
+            get { return _Power; }
+            set => Set(ref _Power, value);
+        }
+
         #endregion
 
         #region Команда получение настроек
@@ -148,8 +164,55 @@ namespace LampApp.ViewModels
             {
                 return new DelegateCommand((obj) =>
                 {
-                    lamp.GetSettings();
+                    IPEndPoint endPointToServer = new IPEndPoint(IPAddress.Parse(Address), int.Parse(Port));
+                    byte[] mes = Encoding.ASCII.GetBytes("GET");
+                    client.Send(mes, mes.Length, endPointToServer);
                 });
+            }
+        }
+
+
+        public ICommand EffectSel
+        {
+            get
+            {
+                return new DelegateCommand((obj) =>
+                {
+                    IPEndPoint endPointToServer = new IPEndPoint(IPAddress.Parse(Address), int.Parse(Port));
+                    byte[] mes = Encoding.ASCII.GetBytes("EFF"+SelectedEffect.NumberEffect);
+                    client.Send(mes, mes.Length, endPointToServer);
+                });
+            }
+        }
+
+        private void Recevive(IAsyncResult res)
+        {
+            try
+            {
+                IPEndPoint endPoint = new IPEndPoint(IPAddress.Any, 0);
+                byte[] recv = client.EndReceive(res, ref endPoint);
+                data = $"{Encoding.ASCII.GetString(recv)}";
+                Status = data;
+                if (data.Contains("CURR"))
+                {
+                    string[] parse = data.Split(' ');
+                    foreach (var item in listEffects)
+                    {
+                        if (item.NumberEffect == int.Parse(parse[1]))
+                            SelectedEffect = item;
+                    }
+                    Brightness = int.Parse(parse[2]);
+                    Speed = int.Parse(parse[3]);
+                    Scale = int.Parse(parse[4]);
+                    Power = !Convert.ToBoolean(int.Parse(parse[5]));
+
+                }
+                client.BeginReceive(new AsyncCallback(Recevive), null);
+
+            }
+            catch (Exception ex)
+            {
+                Status = ex.Message;
             }
         }
         #endregion
@@ -164,9 +227,15 @@ namespace LampApp.ViewModels
             {
                 return new DelegateCommand((obj) =>
                 {
-                
-                    Power = lamp.PowerOnOff(Power);
-                    Status = Power.ToString();
+                    string command;
+                    if (!Power)
+                        command = "P_ON";
+                    else
+                        command = "P_OFF";
+                    IPEndPoint endPointToServer = new IPEndPoint(IPAddress.Parse(Address), int.Parse(Port));
+                    byte[] mes = Encoding.ASCII.GetBytes(command);
+                    client.Send(mes, mes.Length, endPointToServer);
+                    Status = command;
                 });
             }
         }
@@ -194,6 +263,31 @@ namespace LampApp.ViewModels
                 new Effect {NumberEffect = 15, NameEffect = "Матрица"},
                 new Effect {NumberEffect = 16, NameEffect = "Светлячки"}
             };
+
+            client.BeginReceive(new AsyncCallback(Recevive), null);
+
+            Task.Factory.StartNew(() =>
+            {
+                while (true)
+                {
+                    try
+                    {
+                        IPEndPoint endPointToServer = new IPEndPoint(IPAddress.Parse(Address), int.Parse(Port));
+                        byte[] mes = Encoding.ASCII.GetBytes("DEB");
+                        client.Send(mes, mes.Length, endPointToServer);
+                        Task.Delay(2000).Wait();
+                    }
+                    catch (Exception)
+                    {
+
+                        Status = "Подключение...";
+                        Task.Delay(1000).Wait();
+                    }
+
+                }
+
+            });
+
         }
     }
 }
