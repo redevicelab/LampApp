@@ -15,11 +15,11 @@ namespace LampApp.ViewModels
     public class MainViewModel : ViewModel
     {
 
-        //CURR EFF BRI SPD SCA PWR
         private Effect effect = new Effect();
         private bool canParseData = false;
+        private static int localPort = 8889; 
 
-        UdpClient client = new UdpClient(8889);
+        UdpClient client = new UdpClient(localPort);
         string data = "";
 
         #region Заголовок окна
@@ -84,8 +84,6 @@ namespace LampApp.ViewModels
                 client.Send(mes, mes.Length, endPointToServer);
             }
         }
-
-
         #endregion
 
         #region Слайдер скрость
@@ -173,7 +171,13 @@ namespace LampApp.ViewModels
                 });
             }
         }
+        #endregion
 
+        #region
+        /// <summary>
+        /// Бесконечно принимаю данные
+        /// </summary>
+        /// <param name="res">client.BeginReceive(new AsyncCallback(Recevive), null);</param>
         private void Recevive(IAsyncResult res)
         {
             try
@@ -234,26 +238,8 @@ namespace LampApp.ViewModels
         public MainViewModel()
         {
             canParseData = true;
-            ListEffects = new List<Effect>
-            {
-                new Effect {NumberEffect = 0, NameEffect = "Конфити"},
-                new Effect {NumberEffect = 1, NameEffect = "Огонь"},
-                new Effect {NumberEffect = 2, NameEffect = "Радуга вертикальная"},
-                new Effect {NumberEffect = 3, NameEffect = "Радуга горизонтальная"},
-                new Effect {NumberEffect = 4, NameEffect = "Менающиеся цвета"},
-                new Effect {NumberEffect = 5, NameEffect = "Безумие 3D"},
-                new Effect {NumberEffect = 6, NameEffect = "Облака 3D"},
-                new Effect {NumberEffect = 7, NameEffect = "Лава 3D"},
-                new Effect {NumberEffect = 8, NameEffect = "Плазма 3D"},
-                new Effect {NumberEffect = 9, NameEffect = "Радуга 3D"},
-                new Effect {NumberEffect = 10, NameEffect = "Павлин 3D"},
-                new Effect {NumberEffect = 11, NameEffect = "Лес 3D"},
-                new Effect {NumberEffect = 12, NameEffect = "Океан 3D"},
-                new Effect {NumberEffect = 13, NameEffect = "Цвет"},
-                new Effect {NumberEffect = 14, NameEffect = "Снег"},
-                new Effect {NumberEffect = 15, NameEffect = "Матрица"},
-                new Effect {NumberEffect = 16, NameEffect = "Светлячки"}
-            };
+            ListEffectsModel listEffects = new ListEffectsModel();
+            ListEffects = listEffects.Effects;
             client.BeginReceive(new AsyncCallback(Recevive), null);
 
             SendCommandToGetSettingData();
@@ -264,15 +250,16 @@ namespace LampApp.ViewModels
                 {
                     try
                     {
+                        Status = "";
                         IPEndPoint endPointToServer = new IPEndPoint(IPAddress.Parse(Address), int.Parse(Port));
                         byte[] mes = Encoding.ASCII.GetBytes("DEB");
                         client.Send(mes, mes.Length, endPointToServer);
                         Task.Delay(2000).Wait();
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
 
-                        Status = "Подключение...";
+                        Status = ex.Message;
                         Task.Delay(1000).Wait();
                     }
                 }
