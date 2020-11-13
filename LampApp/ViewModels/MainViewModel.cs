@@ -16,7 +16,6 @@ namespace LampApp.ViewModels
     {
 
         //CURR EFF BRI SPD SCA PWR
-        private Lamp lamp = new Lamp();
         private Effect effect = new Effect();
         private bool canParseData = false;
 
