@@ -60,6 +60,7 @@
     <Compile Include="Commands\DelegateCommand.cs" />
     <Compile Include="Models\Effect.cs" />
     <Compile Include="Models\Lamp.cs" />
+    <Compile Include="Models\ListEffectsModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\ViewModel.cs" />
     <Page Include="Themes\Brushes.xaml">
