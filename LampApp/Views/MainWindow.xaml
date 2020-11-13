@@ -140,7 +140,7 @@
                               Grid.Column="1" 
                               Padding="5" 
                               Margin="5"
-                              ItemsSource="{Binding listEffects}"
+                              ItemsSource="{Binding ListEffects}"
                               SelectedItem="{Binding SelectedEffect}"
                               DisplayMemberPath="NameEffect"
                               />
@@ -188,6 +188,8 @@
                                VerticalAlignment="Center" 
                                HorizontalAlignment="Right" 
                                Foreground="White"/>
+
+
                 </Grid>
             </Expander>
         </StackPanel>

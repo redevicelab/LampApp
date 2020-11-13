@@ -18,7 +18,7 @@ namespace LampApp.ViewModels
         //CURR EFF BRI SPD SCA PWR
         private Lamp lamp = new Lamp();
         private Effect effect = new Effect();
-        private bool RuleToParse = false;
+        private bool canParseData = false;
 
         UdpClient client = new UdpClient(8889);
         string data = "";
@@ -79,7 +79,7 @@ namespace LampApp.ViewModels
             set
             {
                 Set(ref _SelectedEffect, value);
-                RuleToParse = true;
+                canParseData = true;
                 IPEndPoint endPointToServer = new IPEndPoint(IPAddress.Parse(Address), int.Parse(Port));
                 byte[] mes = Encoding.ASCII.GetBytes("EFF" + SelectedEffect.NumberEffect);
                 client.Send(mes, mes.Length, endPointToServer);
@@ -166,7 +166,7 @@ namespace LampApp.ViewModels
             {
                 return new DelegateCommand((obj) =>
                 {
-                    RuleToParse = true;
+                    canParseData = true;
                     IPEndPoint endPointToServer = new IPEndPoint(IPAddress.Parse(Address), int.Parse(Port));
                     byte[] mes = Encoding.ASCII.GetBytes("GET");
                     client.Send(mes, mes.Length, endPointToServer);
@@ -183,7 +183,7 @@ namespace LampApp.ViewModels
                 byte[] recv = client.EndReceive(res, ref endPoint);
                 data = $"{Encoding.ASCII.GetString(recv)}";
                 Status = data;
-                if (data.Contains("CURR") && RuleToParse)
+                if (data.Contains("CURR") && canParseData)
                 {
                     string[] parse = data.Split(' ');
                     foreach (var item in ListEffects)
@@ -195,7 +195,7 @@ namespace LampApp.ViewModels
                     Speed = int.Parse(parse[3]);
                     Scale = int.Parse(parse[4]);
                     Power = !Convert.ToBoolean(int.Parse(parse[5]));
-                    RuleToParse = false;
+                    canParseData = false;
                 }
                 client.BeginReceive(new AsyncCallback(Recevive), null);
 
@@ -217,7 +217,7 @@ namespace LampApp.ViewModels
             {
                 return new DelegateCommand((obj) =>
                 {
-                    RuleToParse = true;
+                    canParseData = true;
                     string command;
                     if (!Power)
                         command = "P_ON";
@@ -234,6 +234,7 @@ namespace LampApp.ViewModels
 
         public MainViewModel()
         {
+            canParseData = true;
             ListEffects = new List<Effect>
             {
                 new Effect {NumberEffect = 0, NameEffect = "Конфити"},
@@ -254,10 +255,9 @@ namespace LampApp.ViewModels
                 new Effect {NumberEffect = 15, NameEffect = "Матрица"},
                 new Effect {NumberEffect = 16, NameEffect = "Светлячки"}
             };
-            RuleToParse = true;
             client.BeginReceive(new AsyncCallback(Recevive), null);
 
-            NewMethod();
+            SendCommandToGetSettingData();
 
             Task.Factory.StartNew(() =>
             {
@@ -282,7 +282,7 @@ namespace LampApp.ViewModels
 
         }
 
-        private void NewMethod()
+        private void SendCommandToGetSettingData()
         {
             IPEndPoint endPointToServer = new IPEndPoint(IPAddress.Parse(Address), int.Parse(Port));
             byte[] mes = Encoding.ASCII.GetBytes("GET");
